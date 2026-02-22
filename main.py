@@ -1,228 +1,208 @@
-# main.py - Proyecto SmartVillage
-# DÍA 2: Registro mejorado y listado de habitantes
+# ============================================
+# DÍA CLAVE - SEMANA 4: SIMULACIÓN DE IMPACTO
+# ============================================
 
-import os
-from collections import Counter
+# ---------------------
+# 1. DATOS GLOBALES
+# ---------------------
+lista_habitantes = []  # Aquí guardamos los registros
 
-# === LISTA PARA GUARDAR HABITANTES ===
-habitantes = []
+# Variables para guardar los resultados de la simulación
+resultado_simulacion = {
+    "fecha": "Simulación Día 3",
+    "produccion_total_sin_tecnologia": 0,
+    "produccion_total_con_tecnologia": 0,
+    "mejora_porcentaje": 0,
+    "detalle_por_habitante": []
+}
 
-def limpiar_pantalla():
-    """Limpia la consola (opcional)"""
-    os.system('cls' if os.name == 'nt' else 'clear')
 
-def mostrar_menu():
-    """Muestra el menú principal"""
-    print("\n" + "="*50)
-    print(" 🌱 SMARTVILLAGE - Pueblo Conectado 🌱".center(50))
-    print("="*50)
-    print("1. Registrar nuevo habitante")
-    print("2. Ver lista de habitantes")
-    print("3. Simular impacto tecnológico (Próximamente)")
-    print("4. Mostrar gráficas (Próximamente)")
-    print("5. Guardar y Salir")
-    print("="*50)
-
+# ---------------------
+# 2. FUNCIONES DE REGISTRO
+# ---------------------
 def registrar_habitante():
-    """Registro de habitantes con más datos"""
-    print("\n--- 📝 REGISTRO DE HABITANTE ---")
+    """Registra un nuevo habitante."""
+    print("\n--- REGISTRO DE NUEVO HABITANTE ---")
+    nombre = input("Nombre del habitante: ")
+    edad = input("Edad: ")
+    oficio = input("Oficio (agricultor, ganadero, artesano, etc.): ")
     
-    # Límite de habitantes
-    if len(habitantes) >= 10:
-        print("❌ El pueblo ya tiene 10 habitantes. No podemos registrar más.")
-        input("Presiona Enter para continuar...")
-        return
+    print("¿Tiene acceso a tecnología? (si/no)")
+    tecnologia = input("=> ").lower()
     
-    # === DATOS BÁSICOS ===
-    nombre = input("Nombre completo: ").strip()
-    if not nombre:
-        print("❌ El nombre es obligatorio.")
-        input("Presiona Enter para continuar...")
-        return
-    
-    # Edad con validación
-    try:
-        edad = int(input("Edad: ").strip())
-        if edad < 0 or edad > 120:
-            print("❌ Edad no válida (debe ser entre 0 y 120).")
-            input("Presiona Enter para continuar...")
-            return
-    except ValueError:
-        print("❌ La edad debe ser un número.")
-        input("Presiona Enter para continuar...")
-        return
-    
-    ocupacion = input("Ocupación (ej. agricultor, profesor, etc.): ").strip()
-    if not ocupacion:
-        ocupacion = "No especificada"
-    
-    # === GÉNERO ===
-    print("\nGénero:")
-    print("1. Masculino")
-    print("2. Femenino")
-    print("3. Otro")
-    print("4. Prefiero no decir")
-    opcion_genero = input("Selecciona una opción (1-4): ").strip()
-    
-    generos = {
-        '1': 'Masculino',
-        '2': 'Femenino',
-        '3': 'Otro',
-        '4': 'No especificado'
-    }
-    genero = generos.get(opcion_genero, 'No especificado')
-    
-    # === NIVEL DE ESTUDIOS ===
-    print("\nNivel de estudios:")
-    print("1. Sin estudios")
-    print("2. Primaria")
-    print("3. Secundaria")
-    print("4. Preparatoria / Bachillerato")
-    print("5. Universidad")
-    print("6. Posgrado")
-    opcion_estudios = input("Selecciona una opción (1-6): ").strip()
-    
-    estudios = {
-        '1': 'Sin estudios',
-        '2': 'Primaria',
-        '3': 'Secundaria',
-        '4': 'Preparatoria',
-        '5': 'Universidad',
-        '6': 'Posgrado'
-    }
-    nivel_estudios = estudios.get(opcion_estudios, 'No especificado')
-    
-    # === TECNOLOGÍAS ===
-    print("\nTecnologías que posee (puedes elegir varias, separadas por coma):")
-    print("1. Teléfono inteligente")
-    print("2. Computadora")
-    print("3. Tablet")
-    print("4. Panel solar")
-    print("5. Sensor de riego")
-    print("6. Báscula digital")
-    print("7. Ninguna")
-    
-    opciones_tec = input("Ejemplo: 1,3,5 (o 7 si no tiene): ").strip()
-    
-    tecnologias_dict = {
-        '1': 'Teléfono inteligente',
-        '2': 'Computadora',
-        '3': 'Tablet',
-        '4': 'Panel solar',
-        '5': 'Sensor de riego',
-        '6': 'Báscula digital',
-        '7': 'Ninguna'
+    habitante = {
+        "nombre": nombre,
+        "edad": edad,
+        "oficio": oficio,
+        "tecnologia": tecnologia == "si"
     }
     
-    if opciones_tec == '7':
-        tecnologias_lista = ['Ninguna']
-    else:
-        seleccionadas = [tec.strip() for tec in opciones_tec.split(',') if tec.strip()]
-        tecnologias_lista = []
-        for tec in seleccionadas:
-            if tec in tecnologias_dict:
-                tecnologias_lista.append(tecnologias_dict[tec])
-        if not tecnologias_lista:
-            tecnologias_lista = ['No especificado']
-    
-    # === ACCESO A INTERNET ===
-    print("\n¿Tiene acceso a internet?")
-    print("1. Sí, por datos móviles")
-    print("2. Sí, por WiFi en casa")
-    print("3. Sí, por ambos")
-    print("4. No tiene acceso")
-    opcion_internet = input("Selecciona una opción (1-4): ").strip()
-    
-    internet = {
-        '1': 'Datos móviles',
-        '2': 'WiFi en casa',
-        '3': 'Ambos',
-        '4': 'Sin acceso'
-    }
-    acceso_internet = internet.get(opcion_internet, 'No especificado')
-    
-    # === INGRESO ===
-    try:
-        ingreso = float(input("\nIngreso mensual aproximado (en Dolares, solo números): ").strip() or "0")
-        if ingreso < 0:
-            ingreso = 0
-    except ValueError:
-        ingreso = 0
-        print("  (Ingreso no válido, se asignó 0)")
-    
-    # === CREAR DICCIONARIO ===
-    nuevo_habitante = {
-        'id': len(habitantes) + 1,
-        'nombre': nombre,
-        'edad': edad,
-        'genero': genero,
-        'ocupacion': ocupacion,
-        'estudios': nivel_estudios,
-        'tecnologias': tecnologias_lista,
-        'internet': acceso_internet,
-        'ingreso': ingreso,
-        'productividad_base': 50
-    }
-    
-    # Agregar a la lista
-    habitantes.append(nuevo_habitante)
-    
-    print(f"\n✅ ¡Habitante {nombre} registrado con éxito!")
-    print(f"ID asignado: {nuevo_habitante['id']}")
-    print(f"Tecnologías: {', '.join(tecnologias_lista)}")
-    input("\nPresiona Enter para continuar...")
+    lista_habitantes.append(habitante)
+    print(f"✅ {nombre} ha sido registrado exitosamente!")
+    return habitante
+
 
 def listar_habitantes():
-    """Muestra la lista de habitantes"""
-    print("\n" + "="*60)
-    print(" 📋 LISTA DE HABITANTES DEL PUEBLO 📋".center(60))
-    print("="*60)
-    
-    if not habitantes:
-        print("\n❌ No hay habitantes registrados aún.")
-        input("\nPresiona Enter para continuar...")
+    """Muestra todos los habitantes."""
+    print("\n--- LISTA DE HABITANTES ---")
+    if len(lista_habitantes) == 0:
+        print("❌ No hay habitantes registrados.")
         return
     
-    # Cabecera
-    print(f"\n{'ID':<4} {'NOMBRE':<20} {'EDAD':<5} {'OCUPACIÓN':<15} {'INTERNET':<15}")
-    print("-"*70)
-    
-    # Mostrar cada habitante
-    for h in habitantes:
-        print(f"{h['id']:<4} {h['nombre'][:19]:<20} {h['edad']:<5} {h['ocupacion'][:14]:<15} {h['internet'][:14]:<15}")
-    
-    # Resumen
-    print("\n📊 RESUMEN DEL PUEBLO:")
-    print(f"  • Total de habitantes: {len(habitantes)}")
-    
-    input("\nPresiona Enter para continuar...")
+    for i, h in enumerate(lista_habitantes, 1):
+        tech = "📱 Tiene tecnología" if h['tecnologia'] else "📡 Sin tecnología"
+        print(f"{i}. {h['nombre']} - {h['oficio']} - {tech}")
 
-def main():
-    """Función principal"""
+
+# ---------------------
+# 3. FUNCIÓN CLAVE: SIMULACIÓN DE IMPACTO
+# ---------------------
+def simular_impacto():
+    """
+    🚀 FUNCIÓN MÁS IMPORTANTE DEL DÍA
+    Simula cómo la tecnología mejora la productividad del pueblo.
+    """
+    print("\n" + "="*50)
+    print("🔮 SIMULACIÓN DE IMPACTO TECNOLÓGICO")
+    print("="*50)
     
+    # Validar que haya habitantes
+    if len(lista_habitantes) == 0:
+        print("❌ No hay habitantes para simular. Registra primero.")
+        return
+    
+    # Variables para guardar resultados
+    produccion_sin_tech = 0
+    produccion_con_tech = 0
+    detalles = []
+    
+    print("\n📊 ANALIZANDO CADA HABITANTE...\n")
+    
+    # Recorrer cada habitante
+    for habitante in lista_habitantes:
+        nombre = habitante['nombre']
+        oficio = habitante['oficio']
+        tiene_tech = habitante['tecnologia']
+        
+        # ASIGNAR PRODUCTIVIDAD BASE SEGÚN EL OFICIO
+        if oficio.lower() == "agricultor":
+            base = 100  # kilos de maíz
+        elif oficio.lower() == "ganadero":
+            base = 80   # litros de leche
+        elif oficio.lower() == "artesano":
+            base = 60   # piezas artesanales
+        else:
+            base = 50   # oficio genérico
+        
+        # CALCULAR PRODUCCIÓN CON Y SIN TECNOLOGÍA
+        produccion_actual = base
+        produccion_mejorada = base * 1.5  # 50% más con tecnología
+        
+        # Si ya tiene tecnología, su producción actual ya es la mejorada
+        if tiene_tech:
+            produccion_actual = produccion_mejorada
+        
+        # Acumular totales
+        produccion_sin_tech += base
+        produccion_con_tech += produccion_mejorada
+        
+        # Guardar detalle individual
+        detalle = {
+            "nombre": nombre,
+            "oficio": oficio,
+            "tiene_tecnologia": tiene_tech,
+            "produccion_actual": produccion_actual,
+            "produccion_potencial": produccion_mejorada
+        }
+        detalles.append(detalle)
+        
+        # Mostrar en pantalla
+        print(f"👤 {nombre}:")
+        print(f"   - Producción actual: {produccion_actual:.0f} unidades")
+        print(f"   - Producción potencial (con tecnología): {produccion_mejorada:.0f} unidades")
+        if not tiene_tech:
+            print(f"   ⚡ Podría aumentar {produccion_mejorada - produccion_actual:.0f} unidades con tecnología")
+        print()
+    
+    # CALCULAR MEJORA TOTAL
+    mejora_total = produccion_con_tech - produccion_sin_tech
+    porcentaje_mejora = (mejora_total / produccion_sin_tech) * 100 if produccion_sin_tech > 0 else 0
+    
+    # GUARDAR RESULTADOS EN VARIABLES GLOBALES
+    global resultado_simulacion
+    resultado_simulacion = {
+        "fecha": "Simulación Día 3 - Clave",
+        "produccion_total_sin_tecnologia": produccion_sin_tech,
+        "produccion_total_con_tecnologia": produccion_con_tech,
+        "mejora_porcentaje": porcentaje_mejora,
+        "detalle_por_habitante": detalles
+    }
+    
+    # MOSTRAR RESUMEN FINAL
+    print("="*50)
+    print("📈 RESULTADOS DE LA SIMULACIÓN")
+    print("="*50)
+    print(f"🌾 Producción sin tecnología: {produccion_sin_tech:.0f} unidades")
+    print(f"🚀 Producción con tecnología:  {produccion_con_tech:.0f} unidades")
+    print(f"📈 Mejora total: +{mejora_total:.0f} unidades")
+    print(f"🔥 Porcentaje de mejora: +{porcentaje_mejora:.1f}%")
+    print("="*50)
+    
+    return resultado_simulacion
+
+
+def ver_ultima_simulacion():
+    """Muestra los resultados guardados de la última simulación."""
+    print("\n--- ÚLTIMA SIMULACIÓN GUARDADA ---")
+    if resultado_simulacion["produccion_total_sin_tecnologia"] == 0:
+        print("❌ Aún no has corrido ninguna simulación.")
+        return
+    
+    print(f"📅 {resultado_simulacion['fecha']}")
+    print(f"🌾 Producción sin tecnología: {resultado_simulacion['produccion_total_sin_tecnologia']:.0f}")
+    print(f"🚀 Producción con tecnología: {resultado_simulacion['produccion_total_con_tecnologia']:.0f}")
+    print(f"📈 Mejora: +{resultado_simulacion['mejora_porcentaje']:.1f}%")
+    
+    print("\nDetalle por habitante:")
+    for detalle in resultado_simulacion["detalle_por_habitante"]:
+        tech = "✅ Tiene tech" if detalle['tiene_tecnologia'] else "❌ Sin tech"
+        print(f"   - {detalle['nombre']}: {detalle['produccion_actual']:.0f} unid. {tech}")
+
+
+# ---------------------
+# 4. MENÚ PRINCIPAL ACTUALIZADO
+# ---------------------
+def menu_principal():
     while True:
-        limpiar_pantalla()
-        mostrar_menu()
+        print("\n" + "="*40)
+        print("      S M A R T  V I L L A G E")
+        print("="*40)
+        print("1. Registrar nuevo habitante")
+        print("2. Ver lista de habitantes")
+        print("3. 🔮 SIMULAR IMPACTO (DÍA CLAVE)")
+        print("4. Ver última simulación")
+        print("5. Salir")
+        print("="*40)
         
-        opcion = input("\n👉 Selecciona una opción (1-5): ")
+        opcion = input("Elige una opción (1-5): ")
         
-        if opcion == '1':
+        if opcion == "1":
             registrar_habitante()
-        elif opcion == '2':
+        elif opcion == "2":
             listar_habitantes()
-        elif opcion == '3':
-            print("\n⏳ Simulador en construcción...")
-            input("Presiona Enter para continuar...")
-        elif opcion == '4':
-            print("\n⏳ Gráficas en construcción...")
-            input("Presiona Enter para continuar...")
-        elif opcion == '5':
-            print("\n👋 ¡Hasta pronto!")
+        elif opcion == "3":
+            simular_impacto()  # ⚡ LA FUNCIÓN NUEVA
+        elif opcion == "4":
+            ver_ultima_simulacion()
+        elif opcion == "5":
+            print("👋 ¡Hasta luego!")
             break
         else:
-            print("\n❌ Opción no válida")
-            input("Presiona Enter para continuar...")
+            print("❌ Opción no válida.")
 
+
+# ---------------------
+# 5. PUNTO DE ENTRADA
+# ---------------------
 if __name__ == "__main__":
-    print("🚀 Iniciando SmartVillage - Día 2")
-    main()
+    menu_principal()
