@@ -1,15 +1,18 @@
 # ============================================
-# DÍA CLAVE - SEMANA 4: SIMULACIÓN DE IMPACTO
+# DÍA 4 - GUARDADO EN ARCHIVO Y GRÁFICA
 # ============================================
+
+import matplotlib.pyplot as plt
+import csv
+import os
+from datetime import datetime
 
 # ---------------------
 # 1. DATOS GLOBALES
 # ---------------------
-lista_habitantes = []  # Aquí guardamos los registros
-
-# Variables para guardar los resultados de la simulación
+lista_habitantes = []
 resultado_simulacion = {
-    "fecha": "Simulación Día 3",
+    "fecha": "",
     "produccion_total_sin_tecnologia": 0,
     "produccion_total_con_tecnologia": 0,
     "mejora_porcentaje": 0,
@@ -21,7 +24,6 @@ resultado_simulacion = {
 # 2. FUNCIONES DE REGISTRO
 # ---------------------
 def registrar_habitante():
-    """Registra un nuevo habitante."""
     print("\n--- REGISTRO DE NUEVO HABITANTE ---")
     nombre = input("Nombre del habitante: ")
     edad = input("Edad: ")
@@ -39,11 +41,9 @@ def registrar_habitante():
     
     lista_habitantes.append(habitante)
     print(f"✅ {nombre} ha sido registrado exitosamente!")
-    return habitante
 
 
 def listar_habitantes():
-    """Muestra todos los habitantes."""
     print("\n--- LISTA DE HABITANTES ---")
     if len(lista_habitantes) == 0:
         print("❌ No hay habitantes registrados.")
@@ -55,58 +55,44 @@ def listar_habitantes():
 
 
 # ---------------------
-# 3. FUNCIÓN CLAVE: SIMULACIÓN DE IMPACTO
+# 3. FUNCIÓN DE SIMULACIÓN (ACTUALIZADA)
 # ---------------------
 def simular_impacto():
-    """
-    🚀 FUNCIÓN MÁS IMPORTANTE DEL DÍA
-    Simula cómo la tecnología mejora la productividad del pueblo.
-    """
     print("\n" + "="*50)
     print("🔮 SIMULACIÓN DE IMPACTO TECNOLÓGICO")
     print("="*50)
     
-    # Validar que haya habitantes
     if len(lista_habitantes) == 0:
         print("❌ No hay habitantes para simular. Registra primero.")
         return
     
-    # Variables para guardar resultados
     produccion_sin_tech = 0
     produccion_con_tech = 0
     detalles = []
     
     print("\n📊 ANALIZANDO CADA HABITANTE...\n")
     
-    # Recorrer cada habitante
     for habitante in lista_habitantes:
         nombre = habitante['nombre']
         oficio = habitante['oficio']
         tiene_tech = habitante['tecnologia']
         
-        # ASIGNAR PRODUCTIVIDAD BASE SEGÚN EL OFICIO
+        # Asignar productividad base
         if oficio.lower() == "agricultor":
-            base = 100  # kilos de maíz
+            base = 100
         elif oficio.lower() == "ganadero":
-            base = 80   # litros de leche
+            base = 80
         elif oficio.lower() == "artesano":
-            base = 60   # piezas artesanales
+            base = 60
         else:
-            base = 50   # oficio genérico
+            base = 50
         
-        # CALCULAR PRODUCCIÓN CON Y SIN TECNOLOGÍA
-        produccion_actual = base
-        produccion_mejorada = base * 1.5  # 50% más con tecnología
+        produccion_actual = base * 1.5 if tiene_tech else base
+        produccion_mejorada = base * 1.5
         
-        # Si ya tiene tecnología, su producción actual ya es la mejorada
-        if tiene_tech:
-            produccion_actual = produccion_mejorada
-        
-        # Acumular totales
         produccion_sin_tech += base
         produccion_con_tech += produccion_mejorada
         
-        # Guardar detalle individual
         detalle = {
             "nombre": nombre,
             "oficio": oficio,
@@ -116,29 +102,29 @@ def simular_impacto():
         }
         detalles.append(detalle)
         
-        # Mostrar en pantalla
         print(f"👤 {nombre}:")
         print(f"   - Producción actual: {produccion_actual:.0f} unidades")
-        print(f"   - Producción potencial (con tecnología): {produccion_mejorada:.0f} unidades")
         if not tiene_tech:
             print(f"   ⚡ Podría aumentar {produccion_mejorada - produccion_actual:.0f} unidades con tecnología")
         print()
     
-    # CALCULAR MEJORA TOTAL
     mejora_total = produccion_con_tech - produccion_sin_tech
     porcentaje_mejora = (mejora_total / produccion_sin_tech) * 100 if produccion_sin_tech > 0 else 0
     
-    # GUARDAR RESULTADOS EN VARIABLES GLOBALES
+    # Guardar resultados
     global resultado_simulacion
     resultado_simulacion = {
-        "fecha": "Simulación Día 3 - Clave",
+        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "produccion_total_sin_tecnologia": produccion_sin_tech,
         "produccion_total_con_tecnologia": produccion_con_tech,
         "mejora_porcentaje": porcentaje_mejora,
         "detalle_por_habitante": detalles
     }
     
-    # MOSTRAR RESUMEN FINAL
+    # 📁 GUARDAR EN ARCHIVO CSV (ESTO ES NUEVO)
+    guardar_en_csv()
+    
+    # MOSTRAR RESULTADOS
     print("="*50)
     print("📈 RESULTADOS DE LA SIMULACIÓN")
     print("="*50)
@@ -147,12 +133,105 @@ def simular_impacto():
     print(f"📈 Mejora total: +{mejora_total:.0f} unidades")
     print(f"🔥 Porcentaje de mejora: +{porcentaje_mejora:.1f}%")
     print("="*50)
+
+
+# ---------------------
+# 4. 🆕 FUNCIÓN NUEVA: GUARDAR EN CSV
+# ---------------------
+def guardar_en_csv():
+    """Guarda los resultados de la simulación en un archivo CSV"""
+    archivo = "datos.csv"
+    archivo_existe = os.path.isfile(archivo)
     
-    return resultado_simulacion
+    with open(archivo, mode='a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        
+        # Si el archivo no existía, escribir encabezados
+        if not archivo_existe:
+            writer.writerow(["Fecha", "Habitante", "Oficio", "Tiene_Tecnologia", 
+                           "Produccion_Actual", "Produccion_Potencial"])
+        
+        # Guardar cada habitante
+        for detalle in resultado_simulacion["detalle_por_habitante"]:
+            writer.writerow([
+                resultado_simulacion["fecha"],
+                detalle["nombre"],
+                detalle["oficio"],
+                "Sí" if detalle["tiene_tecnologia"] else "No",
+                detalle["produccion_actual"],
+                detalle["produccion_potencial"]
+            ])
+    
+    print(f"✅ Datos guardados en {archivo}")
+
+
+# ---------------------
+# 5. 🆕 FUNCIÓN NUEVA: GENERAR GRÁFICA
+# ---------------------
+def generar_grafica():
+    """Genera una gráfica comparando producción con y sin tecnología"""
+    if len(lista_habitantes) == 0:
+        print("❌ No hay datos para graficar. Ejecuta una simulación primero.")
+        return
+    
+    # Preparar datos
+    nombres = [h['nombre'] for h in lista_habitantes]
+    produccion_actual = []
+    produccion_potencial = []
+    
+    for h in lista_habitantes:
+        if h['tecnologia']:
+            # Si tiene tecnología, su producción actual ya es la potencial
+            base = 100 if h['oficio'].lower() == "agricultor" else 80 if h['oficio'].lower() == "ganadero" else 60 if h['oficio'].lower() == "artesano" else 50
+            produccion_actual.append(base * 1.5)
+            produccion_potencial.append(base * 1.5)
+        else:
+            base = 100 if h['oficio'].lower() == "agricultor" else 80 if h['oficio'].lower() == "ganadero" else 60 if h['oficio'].lower() == "artesano" else 50
+            produccion_actual.append(base)
+            produccion_potencial.append(base * 1.5)
+    
+    # Crear gráfica
+    plt.figure(figsize=(10, 6))
+    
+    # Barras
+    x = range(len(nombres))
+    ancho = 0.35
+    
+    barras_actual = plt.bar([i - ancho/2 for i in x], produccion_actual, 
+                           ancho, label='Producción Actual', color='skyblue')
+    barras_potencial = plt.bar([i + ancho/2 for i in x], produccion_potencial, 
+                              ancho, label='Producción Potencial (con tecnología)', color='orange')
+    
+    # Personalizar
+    plt.xlabel('Habitantes')
+    plt.ylabel('Producción (unidades)')
+    plt.title('Impacto de la Tecnología en la Producción')
+    plt.xticks(x, nombres, rotation=45)
+    plt.legend()
+    
+    # Agregar valores en las barras
+    for barra in barras_actual:
+        altura = barra.get_height()
+        plt.text(barra.get_x() + barra.get_width()/2., altura,
+                f'{int(altura)}', ha='center', va='bottom')
+    
+    for barra in barras_potencial:
+        altura = barra.get_height()
+        plt.text(barra.get_x() + barra.get_width()/2., altura,
+                f'{int(altura)}', ha='center', va='bottom')
+    
+    plt.tight_layout()
+    
+    # Guardar gráfica
+    archivo_grafica = "grafica_impacto.png"
+    plt.savefig(archivo_grafica, dpi=150)
+    print(f"✅ Gráfica guardada como {archivo_grafica}")
+    
+    # Mostrar gráfica
+    plt.show()
 
 
 def ver_ultima_simulacion():
-    """Muestra los resultados guardados de la última simulación."""
     print("\n--- ÚLTIMA SIMULACIÓN GUARDADA ---")
     if resultado_simulacion["produccion_total_sin_tecnologia"] == 0:
         print("❌ Aún no has corrido ninguna simulación.")
@@ -170,7 +249,7 @@ def ver_ultima_simulacion():
 
 
 # ---------------------
-# 4. MENÚ PRINCIPAL ACTUALIZADO
+# 6. MENÚ PRINCIPAL
 # ---------------------
 def menu_principal():
     while True:
@@ -179,30 +258,44 @@ def menu_principal():
         print("="*40)
         print("1. Registrar nuevo habitante")
         print("2. Ver lista de habitantes")
-        print("3. 🔮 SIMULAR IMPACTO (DÍA CLAVE)")
+        print("3. 🔮 SIMULAR IMPACTO")
         print("4. Ver última simulación")
-        print("5. Salir")
+        print("5. 📁 VER ARCHIVO CSV (datos.csv)")
+        print("6. 📊 GENERAR GRÁFICA")
+        print("7. Salir")
         print("="*40)
         
-        opcion = input("Elige una opción (1-5): ")
+        opcion = input("Elige una opción (1-7): ")
         
         if opcion == "1":
             registrar_habitante()
         elif opcion == "2":
             listar_habitantes()
         elif opcion == "3":
-            simular_impacto()  # ⚡ LA FUNCIÓN NUEVA
+            simular_impacto()
         elif opcion == "4":
             ver_ultima_simulacion()
         elif opcion == "5":
+            if os.path.exists("datos.csv"):
+                print("\n--- CONTENIDO DE datos.csv ---")
+                with open("datos.csv", 'r', encoding='utf-8') as f:
+                    print(f.read())
+            else:
+                print("❌ El archivo datos.csv aún no existe. Ejecuta una simulación primero.")
+        elif opcion == "6":
+            generar_grafica()
+        elif opcion == "7":
             print("👋 ¡Hasta luego!")
             break
         else:
             print("❌ Opción no válida.")
 
 
-# ---------------------
-# 5. PUNTO DE ENTRADA
-# ---------------------
 if __name__ == "__main__":
+    print("🔄 Verificando librerías...")
+    try:
+        plt.figure()  # Prueba rápida
+        plt.close()
+    except:
+        print("⚠️ matplotlib no está instalado. Ejecuta: pip install matplotlib")
     menu_principal()
