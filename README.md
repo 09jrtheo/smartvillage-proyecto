@@ -1,13 +1,13 @@
 # 🌾 SmartVillage - Proyecto Integrador
 
-## 📋 DATOS DEL GRUPO
+
 - **Nombre del Proyecto:** El impacto de las nuevas tecnologías en la sociedad: SmartVillage
-- **Asignatura:** Programación [Pon el nombre exacto de tu materia]
+- **Asignatura:** Logica de programacion
 - **Integrantes:** 
-  - [Tu Nombre]
-  - [Nombre del compañero si hay]
-- **Fecha de entrega:** [Pon la fecha de hoy]
-- **Repositorio:** https://github.com/[tu-usuario]/smartvillage-proyecto
+  -Mateo Fernando Amangano Quishpe 
+  
+- **Fecha de entrega:** 01/03/2026
+- **Repositorio:** https://github.com/09jrtheo/smartvillage-proyecto
 
 ---
 
